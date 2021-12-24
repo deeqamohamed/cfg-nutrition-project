@@ -1,5 +1,11 @@
 import requests
 import pandas as pd
+#check this
+
+#from collections import defaultdict
+# self.user_info = defaultdict(list)
+#self.user_info["recipe"].append(recipe)
+#self.user_info["review"].append(review)
 
 # Input queries
 query = "chicken"  #input("What is your ingredient of choice?\n")
