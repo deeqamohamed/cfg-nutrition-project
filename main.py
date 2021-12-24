@@ -3,7 +3,10 @@ from Recipe_class import Recipe
 import pandas as pd
 
 def main():
-    query = input("What ingredient would you like to enter? \n") #input one ingredient only
+    username = input("\nPlease enter your name: \n")
+
+    # input one ingredient only as it does not work well with multiple ingredients
+    query = input("What ingredient would you like to enter? \n")
 
     print("\nHere is a list of health options: \n")
 
@@ -23,8 +26,10 @@ def main():
         except:
             print("\nYou should only put in numbers, please try again:\n ")
         else:
-            if health_input-1 < 35:
+            if health_input <= len(health_list):
                 break
+            else:
+                print("\nYour number is out of range\n")
 
     health = health_list[health_input-1]
 
@@ -40,41 +45,72 @@ def main():
         except:
             print("\nYou should only put in numbers, please try again:\n ")
         else:
-            if diet_input-1 < 6:
+            if diet_input <= len(diet_list):
                 break
+            else:
+                print("\nYour number is out of range\n")
 
     diet = diet_list[diet_input-1]
 
     excluded = input("\nWhat are you allergic to?\n")
 
-    api = CallAPI(query, health, diet, excluded)
+    api = CallAPI(username, query, health, diet, excluded)
+    # gets the response
     api.call_api()
+    # choosing the keys that we want -> returning the api messy data
     api.get_recipe_info()
 
+    # print(api.recipe_info) #api object allows you to access the messy recipe info -> put in the recipe class to filter in the order of the init params
     recipe_dict = dict()
     for i in range(1, 21):
         recipe_dict[f'Recipe {i}'] = Recipe(api.recipe_info[i-1]["recipe_name"], api.recipe_info[i-1]["image"], api.recipe_info[i-1]["recipe_ingredients"], api.recipe_info[i-1]["calories"], api.recipe_info[i-1]["total_nutrients"], api.recipe_info[i-1]["allergies"])
 
+    # printing out everything in the recipe dictionary
     for k, v in recipe_dict.items():
         print(k + ":")
         print(v)
         print("\n")
 
-    api.ask_user()
+    # ask the user if they want to review a recipe
+    if input("\nWould you like to review a recipe? Y or N\n").upper() == "Y":
+        api.ask_user() # change to print(api.ask_user()) if you want to see what is in the db as the ask_user function returns self.database
 
-    while True:
-        review_flag = input("\nDo you want to review another recipe? Y or N\n")
-        if review_flag.upper() == "Y":
-            api.ask_user()
-        else:
-            break
+    # ask the user if they want to review another recipe
+        while True:
+            review_flag = input("\nDo you want to review another recipe? Y or N\n")
+            if review_flag.upper() == "Y":
+                api.ask_user()
+            else:
+                break
 
-def csv_read(filename):
-    df = pd.read_csv(filename)
+    # prints the database after seeing it
+    # print(api.database)
 
+    # return average rating for the recipe -> get_average()["average rating"]
+    # print(api.get_average())
+
+    #uncomment when you want to clear the db
+    # api.clear_database()
+    # print(api.database) #see cleared db
+
+    # print("")
+
+    #use explore database to retrieve the recipe's reviews based on the recipe number
+    view_ratings = input("\nWould you like to see the review and average ratings for a particular recipe? Y or N\n").upper()
+    if view_ratings == "Y":
+        api.explore_db()
+        while True:
+            view_ratings = input("\nWould you like to see the review and average ratings for another recipe? Y or N\n").upper()
+            if view_ratings == "Y":
+                api.explore_db()
+            else:
+                break
 
 if __name__== '__main__':
-    main()
-
-
+    #reruns the whole code until a new user does not want to be entered
+    while True:
+        main()
+        if input("\nWould you like to enter another user: Y or N\n").upper() == "N":
+            print("\nThank you, see you again next time!\n")
+            break
 
