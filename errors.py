@@ -19,3 +19,6 @@ class TestRecipeFunction(TestCase):
         api = CallAPI("lemon", "gluten-free", "high-fiber", "sesame")
         api.call_api()
         self.assertEqual(api.response["from"], 21)
+
+
+    #can check the average rating
