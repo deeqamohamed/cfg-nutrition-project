@@ -5,9 +5,6 @@ class CallAPI:
 
     app_id = "9bda37b4"
     app_key = "3a045b9095af03671e2b052783e9e68a"
-    recipe_info = []
-    response = None
-    recipe_table = None
 
     def __init__(self, username, query, health, diet, excluded):
         self.username = username
@@ -16,6 +13,9 @@ class CallAPI:
         self.diet = diet
         self.excluded = excluded
         self.database = []
+        self.recipe_info = []
+        self.response = None
+        self.recipe_table = None
 
         self.df = pd.read_csv("database.csv", index_col=0)
 
@@ -26,6 +26,10 @@ class CallAPI:
         self.response = requests.get(f'https://api.edamam.com/api/recipes/v2?q={self.query}&app_key=%20{self.app_key}%09&_cont=CHcVQBtNNQphDmgVQntAEX4BYldtBAAFS2xJBmAbZlVwAAIAUXlSAGEVNQMiBApRRDZGV2AQZAF0UQIPSmJIVmoaawZ6AFEVLnlSVSBMPkd5BgMbUSYRVTdgMgksRlpSAAcRXTVGcV84SU4%3D&type=public&app_id={self.app_id}&diet={self.diet}&health={self.health}&excluded={self.excluded}').json()
 
     def get_recipe_info(self):
+
+        if self.response["hits"] == []:
+            print("\nThere is no result for this query.\n")
+            return
 
         for i in range(20):
             recipe = dict()
@@ -100,7 +104,7 @@ class CallAPI:
         recipe_list = [i[0] for i in self.database] #recipe is first index
         recipe_user_list = list(zip(recipe_list, user_list)) #can use lists in zip to make a list of tuples as well as dict
         #if the new recipe is in the db override if it is not then replace it
-        if recipe in recipe_list and self.username in user_list: #checking if the review has been done for that particular recipe and name
+        if (recipe, self.username) in recipe_user_list: #checking if the review has been done for that particular recipe and name
             ind = recipe_user_list.index((recipe, self.username)) #find pos of old review in db
             self.database[ind] = [recipe, self.username, review, rating] #replace old review with the new one in the db
         else:
@@ -124,6 +128,7 @@ class CallAPI:
 
     #returns the ratings and reviews for a particular recipe
     def explore_db(self):
+        self.df = pd.read_csv("database.csv", index_col=0)
         recipe_names = list(set(list(self.df["Recipe name"])))
 
         for i in range(len(recipe_names)):
@@ -152,6 +157,3 @@ class CallAPI:
         self.database = self.database[0:0]
 
         pd.read_csv("database.csv", index_col=0)[0:0].to_csv("database.csv")#not importing index in
-
-
-
