@@ -44,12 +44,3 @@ class Recipe:
           '''
         for i in self.recipe_ingredients:
             print(i)
-
-
-
-
-
-
-
-
-
